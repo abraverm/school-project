@@ -11,6 +11,12 @@ from elasticsearch import exceptions
 import names
 from loremipsum import get_sentences
 import  bugzilla
+import  dateutil
+import dateutil.parser
+#import dateutil
+
+def convert_iso_time (iso_date):
+    return [dateutil.parser.parse(str(iso_date))]
 
 def load_config():
     config = configparser.ConfigParser()
@@ -55,11 +61,21 @@ def main():
         bug.refresh()
         bug_body = bug.__dict__
         bug_id = bug.__dict__['id']
-        bug_body.pop('last_change_time')
-        bug_body.pop('creation_time')
+        #bug_body.pop('last_change_time')
+        #bug_body.pop('creation_time')
         bug_body.pop('bugzilla')
-        bug_body.pop('flags')
+        #bug_body.pop('flags')
         bug_body.pop('comments')
+
+        iso_last_change = bug.__dict__['last_change_time']
+        bug_last_change = convert_iso_time(iso_last_change)
+        iso_creation_time = bug.__dict__['creation_time']
+        bug_creation_time = convert_iso_time(iso_creation_time)
+
+        bug_body['last_change_time'] = bug_last_change
+        bug_body['creation_time'] = bug_creation_time
+        #print(bug_body['comments'])
+
         for field in bug_body:
             if hasattr(bug, field):
                 print("%s: %s"% (field, getattr(bug, field)))
